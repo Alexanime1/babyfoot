@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Baby-foot</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #ff3c00;
+    --c2: #00c2ff;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: rgba(255,255,255,0.07);
+    --text: #ffffff;
+    --muted: rgba(255,255,255,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Connexion ── */
+  #screen-connect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    min-height: 100svh;
+    padding: 32px 24px;
+    background: var(--bg);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.2rem;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .connect-card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .connect-card h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .ip-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .ip-row input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ip-row input:focus { border-color: rgba(255,255,255,0.25); }
+  .ip-row input::placeholder { color: var(--muted); }
+
+  .btn-connect {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--c1), #ff7a00);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .btn-connect:active { opacity: 0.8; transform: scale(0.97); }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    min-height: 20px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .dot.connecting { background: #ffaa00; animation: pulse 0.8s ease-in-out infinite alternate; }
+  .dot.ok  { background: #00e676; }
+  .dot.err { background: var(--c1); }
+
+  @keyframes pulse { to { opacity: 0.3; } }
+
+  .tip {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .tip strong { color: rgba(255,255,255,0.6); }
+
+  /* ── Score ── */
+  #screen-score {
+    display: none;
+    flex-direction: column;
+    min-height: 100svh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+  }
+
+  .topbar .logo-sm {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .conn-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .conn-badge .dot { width: 6px; height: 6px; flex-shrink: 0; }
+
+  /* Score area */
+  .score-area {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 16px;
+    gap: 0;
+  }
+
+  .team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .team-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .team-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 24vw, 10rem);
+    line-height: 0.9;
+    transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), color 0.2s;
+  }
+  .team-score.bump { transform: scale(1.18); }
+
+  .team-1 .team-score { color: var(--c1); }
+  .team-2 .team-score { color: var(--c2); }
+
+  .score-sep {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 5rem);
+    color: var(--border);
+    padding: 0 8px;
+    user-select: none;
+  }
+
+  /* Recent goals feed */
+  .goals-feed {
+    padding: 0 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 80px;
+  }
+
+  .goal-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform: translateY(-8px); } }
+
+  .goal-pill {
+    font-size: 0.7rem;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 3px 10px;
+    flex-shrink: 0;
+  }
+  .goal-pill.t1 { background: rgba(255,60,0,0.15); color: var(--c1); }
+  .goal-pill.t2 { background: rgba(0,194,255,0.15); color: var(--c2); }
+
+  /* Actions bottom */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 20px 32px;
+  }
+
+  .btn-action {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 16px 12px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-action:active { transform: scale(0.97); }
+  .btn-action.danger { border-color: rgba(255,60,0,0.3); }
+  .btn-action.danger:active { background: rgba(255,60,0,0.08); }
+
+  .icon { font-size: 1rem; }
+
+  /* Winner overlay */
+  #winner-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  #winner-overlay.show { display: flex; }
+
+  .winner-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .winner-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    letter-spacing: 0.08em;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from { transform: scale(0.5); opacity: 0; } }
+
+  .btn-new {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 16px 40px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-new:active { opacity: 0.8; }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: fall linear forwards;
+    pointer-events: none;
+    z-index: 99;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── ÉCRAN CONNEXION ── -->
+<div id="screen-connect">
+  <div class="logo">Baby-foot</div>
+
+  <div class="connect-card">
+    <h2>Connexion à l'ESP32</h2>
+
+    <div class="ip-row">
+      <input type="text" id="ip-input" placeholder="192.168.1.42" inputmode="decimal"
+             value="" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn-connect" onclick="connecter()">Go</button>
+    </div>
+
+    <div class="status-dot" id="status-row">
+      <span class="dot" id="dot"></span>
+      <span id="status-txt">En attente…</span>
+    </div>
+
+    <p class="tip">
+      Branche l'ESP32, ouvre le <strong>moniteur série</strong> dans Arduino IDE,<br>
+      puis tape l'adresse IP affichée ici.
+    </p>
+  </div>
+
+  <p class="tip" style="max-width:320px">
+    Ton téléphone et l'ESP32 doivent être sur le <strong>même réseau Wi-Fi</strong>.
+  </p>
+</div>
+
+<!-- ── ÉCRAN SCORE ── -->
+<div id="screen-score">
+
+  <div class="topbar">
+    <span class="logo-sm">BF</span>
+    <div class="conn-badge" onclick="deconnecter()">
+      <span class="dot ok" id="badge-dot"></span>
+      <span id="badge-ip">—</span>
+    </div>
+  </div>
+
+  <div class="score-area">
+    <div class="team team-1">
+      <div class="team-name" id="nom1-display">Équipe 1</div>
+      <div class="team-score" id="score1">0</div>
+    </div>
+    <div class="score-sep">–</div>
+    <div class="team team-2">
+      <div class="team-score" id="score2">0</div>
+      <div class="team-name" id="nom2-display">Équipe 2</div>
+    </div>
+  </div>
+
+  <div class="goals-feed" id="feed"></div>
+
+  <div class="actions">
+    <button class="btn-action" onclick="butManuel(1)">
+      <span class="icon">+</span> Équipe 1
+    </button>
+    <button class="btn-action" onclick="butManuel(2)">
+      <span class="icon">+</span> Équipe 2
+    </button>
+    <button class="btn-action" onclick="annuler()">
+      <span class="icon">↩</span> Annuler
+    </button>
+    <button class="btn-action danger" onclick="confirmerReset()">
+      <span class="icon">⟳</span> Reset
+    </button>
+  </div>
+</div>
+
+<!-- ── OVERLAY VAINQUEUR ── -->
+<div id="winner-overlay">
+  <div class="winner-text">Vainqueur</div>
+  <div class="winner-name" id="winner-name">—</div>
+  <button class="btn-new" onclick="nouvellePartie()">Nouvelle partie</button>
+</div>
+
+<script>
+let ws = null;
+let s1 = 0, s2 = 0;
+let historique = [];
+let ipSaved = '';
+const MAX_BUTS = 10;
+
+function setStatus(state, txt) {
+  const dot = document.getElementById('dot');
+  const stxt = document.getElementById('status-txt');
+  dot.className = 'dot ' + state;
+  stxt.textContent = txt;
+}
+
+function connecter() {
+  const ip = document.getElementById('ip-input').value.trim();
+  if (!ip) { setStatus('err', 'Entre une adresse IP'); return; }
+  ipSaved = ip;
+  setStatus('connecting', 'Connexion…');
+  if (ws) ws.close();
+  try {
+    ws = new WebSocket('ws://' + ip + ':81');
+    ws.onopen = () => {
+      setStatus('ok', 'Connecté !');
+      setTimeout(afficherScore, 600);
+    };
+    ws.onmessage = (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        if (typeof d.s1 === 'number') { s1 = d.s1; s2 = d.s2; rafraichir(); }
+      } catch {}
+    };
+    ws.onclose = () => {
+      setStatus('err', 'Déconnecté');
+      document.getElementById('badge-dot').className = 'dot err';
+    };
+    ws.onerror = () => setStatus('err', 'Impossible de joindre l\'ESP32');
+  } catch(e) { setStatus('err', 'Adresse invalide'); }
+}
+
+function afficherScore() {
+  document.getElementById('screen-connect').style.display = 'none';
+  const ss = document.getElementById('screen-score');
+  ss.style.display = 'flex';
+  document.getElementById('badge-ip').textContent = ipSaved;
+}
+
+function deconnecter() {
+  if (ws) ws.close();
+  document.getElementById('screen-connect').style.display = 'flex';
+  document.getElementById('screen-score').style.display = 'none';
+  setStatus('', 'En attente…');
+}
+
+function rafraichir(equipe) {
+  const el1 = document.getElementById('score1');
+  const el2 = document.getElementById('score2');
+  el1.textContent = s1;
+  el2.textContent = s2;
+  if (equipe === 1) bump(el1, '--c1');
+  if (equipe === 2) bump(el2, '--c2');
+  if (s1 >= MAX_BUTS) afficherVainqueur(1);
+  if (s2 >= MAX_BUTS) afficherVainqueur(2);
+}
+
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 300);
+}
+
+function ajouterFeed(equipe) {
+  const feed = document.getElementById('feed');
+  const now = new Date().toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const nom = equipe === 1 ? document.getElementById('nom1-display').textContent
+                           : document.getElementById('nom2-display').textContent;
+  const item = document.createElement('div');
+  item.className = 'goal-item';
+  item.innerHTML = `<span class="goal-pill t${equipe}">BUT</span><span>${nom} marque !</span><span style="margin-left:auto;font-size:0.75rem">${now}</span>`;
+  feed.prepend(item);
+  if (feed.children.length > 4) feed.lastChild.remove();
+  historique.push({ equipe, s1, s2 });
+}
+
+function butManuel(equipe) {
+  if (equipe === 1) s1++;
+  else s2++;
+  ajouterFeed(equipe);
+  rafraichir(equipe);
+  if (ws && ws.readyState === 1) ws.send('reset_noop');
+  confetti();
+}
+
+function annuler() {
+  if (!historique.length) return;
+  const last = historique.pop();
+  s1 = last.s1; s2 = last.s2;
+  rafraichir();
+  const feed = document.getElementById('feed');
+  if (feed.firstChild) feed.firstChild.remove();
+  if (ws && ws.readyState === 1) ws.send('set:' + s1 + ':' + s2);
+}
+
+function confirmerReset() {
+  if (confirm('Remettre le score à 0 ?')) {
+    s1 = 0; s2 = 0; historique = [];
+    document.getElementById('feed').innerHTML = '';
+    rafraichir();
+    if (ws && ws.readyState === 1) ws.send('reset');
+  }
+}
+
+function afficherVainqueur(equipe) {
+  const nom = equipe === 1
+    ? document.getElementById('nom1-display').textContent
+    : document.getElementById('nom2-display').textContent;
+  document.getElementById('winner-name').textContent = nom;
+  document.getElementById('winner-name').style.color = equipe === 1 ? 'var(--c1)' : 'var(--c2)';
+  document.getElementById('winner-overlay').classList.add('show');
+  for (let i = 0; i < 60; i++) setTimeout(spawnConfetti, i * 40);
+}
+
+function nouvellePartie() {
+  document.getElementById('winner-overlay').classList.remove('show');
+  s1 = 0; s2 = 0; historique = [];
+  document.getElementById('feed').innerHTML = '';
+  rafraichir();
+  if (ws && ws.readyState === 1) ws.send('reset');
+}
+
+function confetti() {
+  for (let i = 0; i < 12; i++) setTimeout(spawnConfetti, i * 30);
+}
+
+function spawnConfetti() {
+  const c = document.createElement('div');
+  c.className = 'confetti-piece';
+  const colors = ['#ff3c00','#00c2ff','#ffaa00','#ffffff','#ff7a00'];
+  c.style.cssText = `
+    left:${Math.random()*100}vw;
+    top:-20px;
+    background:${colors[Math.floor(Math.random()*colors.length)]};
+    animation-duration:${0.8+Math.random()*1.2}s;
+    animation-delay:${Math.random()*0.2}s;
+    transform:rotate(${Math.random()*360}deg);
+    width:${6+Math.random()*8}px;
+    height:${6+Math.random()*8}px;
+  `;
+  document.body.appendChild(c);
+  setTimeout(() => c.remove(), 2000);
+}
+
+/* Tenter auto-connexion si IP mémorisée */
+window.onload = () => {
+  const saved = localStorage.getItem('bf_ip');
+  if (saved) {
+    document.getElementById('ip-input').value = saved;
+  }
+};
+
+document.getElementById('ip-input').addEventListener('change', e => {
+  localStorage.setItem('bf_ip', e.target.value.trim());
+});
+</script>
+</body>
+</html>
